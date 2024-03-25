@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+    container_name: sdfs-web
+    ports:
+      - "${WEB_PORT}:${WEB_PORT}"
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+    networks:
+      - sdfs-networks
+
+  db:
+    image: postgres:15-alpine
+    container_name: sfds_host
+    volumes:
+      - sfds_postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=${DATABASE_NAME}
+      - POSTGRES_USER=${DATABASE_USER}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+    ports:
+      - "${DATABASE_PORT}:${DATABASE_PORT}"
+    networks:
+      - sdfs-networks
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: sdfs-pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - "${PG_ADMIN_EXPOSE_PORT}:${PG_ADMIN_DOCKER_PORT}"
+    depends_on:
+      - db
+    networks:
+      - sdfs-networks
+
+volumes:
+  sfds_postgres_data:
+
+networks:
+  sdfs-networks:
+    driver: bridge
